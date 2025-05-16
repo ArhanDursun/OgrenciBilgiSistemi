@@ -1,0 +1,40 @@
+﻿@model IEnumerable<OgrenciBilgiSistemi.Models.StudentCourseViewModel>
+@{
+    ViewData["Title"] = "Derslere Kayıt Ol";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Ders</th>
+            <th>Öğretmen</th>
+            <th>Durum</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.Title</td>
+                <td>@c.TeacherName</td>
+                <td>
+                    @if (c.IsEnrolled)
+                    {
+                        <span class="badge bg-success">Kayıtlı</span>
+                    }
+                    else
+                    {
+                        <form asp-action="Enroll" method="post" class="d-inline">
+                            <input type="hidden" name="courseId" value="@c.CourseId" />
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                Kayıt Ol
+                            </button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

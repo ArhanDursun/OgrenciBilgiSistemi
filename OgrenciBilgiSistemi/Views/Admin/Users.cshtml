@@ -1,0 +1,53 @@
+﻿@using System
+@model IEnumerable<OgrenciBilgiSistemi.Models.User>
+
+@{
+    ViewData["Title"] = "Kullanıcılar";
+}
+
+<h2>@ViewData["Title"]</h2>
+<a asp-action="CreateUser" class="btn btn-primary mb-3">Yeni Kullanıcı</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Fotoğraf</th>
+            <th>Ad Soyad</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>
+                    @if (u.Photo?.Length > 0)
+                    {
+                        var base64 = Convert.ToBase64String(u.Photo);
+                        <img src="data:image/png;base64,@base64" width="50" class="img-thumbnail" />
+                    }
+                </td>
+                <td>@u.FirstName @u.LastName</td>
+                <td>@u.Email</td>
+                <td>@u.Role</td>
+                <td>
+                    <a asp-action="EditUser" asp-route-id="@u.Id" class="btn btn-sm btn-warning">Düzenle</a>
+                    <form asp-action="DeleteUser" asp-route-id="@u.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger"
+                                onclick="return confirm('Silmek istediğinize emin misiniz?');">
+                            Sil
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
