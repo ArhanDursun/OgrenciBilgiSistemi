@@ -1,15 +1,45 @@
-﻿@model LoginViewModel
+﻿@model OgrenciBilgiSistemi.Models.LoginViewModel
 
-<form asp-action="Login" method="post">
-    <div>
-        <label asp-for="Email"></label>
-        <input asp-for="Email" />
-        <span asp-validation-for="Email"></span>
+@{
+    ViewData["Title"] = "Giriş";
+}
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow-sm" style="width: 100%; max-width: 400px;">
+        <div class="card-header text-center bg-primary text-white">
+            <h4 class="mb-0">Öğrenci Bilgi Sistemi</h4>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title text-center mb-4">Oturum Aç</h5>
+
+            <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+            <form asp-action="Login" method="post" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">E-Posta</label>
+                    <input asp-for="Email" class="form-control form-control-lg" placeholder="you@example.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label">Parola</label>
+                    <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="••••••••" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">Giriş Yap</button>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer text-center">
+            <small>&copy; 2025 ÖğrenciBilgiSistemi</small>
+        </div>
     </div>
-    <div>
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" />
-        <span asp-validation-for="Password"></span>
-    </div>
-    <button type="submit">Giriş</button>
-</form>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

@@ -131,11 +131,22 @@ namespace OgrenciBilgiSistemi.Controllers
         public async Task<IActionResult> Courses()
         {
             var courses = await _db.Courses
-                                   .Include(c => c.Teacher)
-                                   .ToListAsync();
+                .Include(c => c.Teacher)
+                .Include(c => c.Enrollments)    // ← Enrollment'ları da yüklüyoruz
+                .ToListAsync();
             return View(courses);
         }
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CourseDetails(int id)
+        {
+            var course = await _db.Courses
+                .Include(c => c.Enrollments)
+                    .ThenInclude(e => e.Student)
+                .FirstOrDefaultAsync(c => c.Id == id);
 
+            if (course == null) return NotFound();
+            return View(course);
+        }
         // GET: /Admin/CreateCourse
         public IActionResult CreateCourse()
         {
@@ -151,14 +162,31 @@ namespace OgrenciBilgiSistemi.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCourse(Course course)
         {
+            // 1) Öğretmen listesini her ihtimale karşı hazırla
+            var teachers = await _db.Users
+                                    .Where(u => u.Role == "Teacher")
+                                    .ToListAsync();
+            ViewBag.TeacherList = new SelectList(teachers, "Id", "Email", course.TeacherId);
+
+            // 2) ModelState kontrolü
             if (!ModelState.IsValid)
             {
-                var teachers = _db.Users.Where(u => u.Role == "Teacher").ToList();
-                ViewBag.TeacherList = new SelectList(teachers, "Id", "Email", course.TeacherId);
+                // ValidationSummary ve individual span’larda hata mesajları görünecek
                 return View(course);
             }
+
+            // 3) Kaydetme işlemi
             _db.Courses.Add(course);
-            await _db.SaveChangesAsync();
+            var changes = await _db.SaveChangesAsync();
+
+            // 4) Kaydetme başarısızsa kullanıcıya bildir
+            if (changes < 1)
+            {
+                ModelState.AddModelError(string.Empty, "Ders veritabanına eklenemedi, lütfen tekrar deneyin.");
+                return View(course);
+            }
+
+            // 5) Başarılıysa liste sayfasına yönlendir
             return RedirectToAction(nameof(Courses));
         }
 

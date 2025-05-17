@@ -1,63 +1,86 @@
 ﻿@model OgrenciBilgiSistemi.Models.User
+
 @{
     ViewData["Title"] = "Kullanıcı Düzenle";
+    Layout = "_Layout";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">@ViewData["Title"]</h5>
+            <a asp-action="Users" class="btn btn-light">
+                <i class="bi bi-arrow-left-circle"></i> Geri
+            </a>
+        </div>
+        <div class="card-body">
+            <div asp-validation-summary="All" class="alert alert-danger"></div>
 
-<form asp-action="EditUser" method="post" enctype="multipart/form-data">
-    <input type="hidden" asp-for="Id" />
+            <form asp-action="EditUser" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
 
-    <div class="mb-3">
-        <label asp-for="FirstName" class="form-label">Ad</label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="FirstName" class="form-label">Ad</label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="LastName" class="form-label">Soyad</label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3 mt-3">
+                    <label asp-for="Email" class="form-label">E-Posta</label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="PasswordHash" class="form-label">Parola (opsiyonel)</label>
+                        <input asp-for="PasswordHash" type="password" class="form-control" />
+                        <span asp-validation-for="PasswordHash" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Role" class="form-label">Rol</label>
+                        <select asp-for="Role" class="form-select" asp-items="ViewBag.Roles">
+                            <option value="">-- Rol Seçiniz --</option>
+                        </select>
+                        <span asp-validation-for="Role" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3 mt-3">
+                    <label class="form-label">Mevcut Fotoğraf</label><br />
+                    @if (Model.Photo?.Length > 0)
+                    {
+                        var base64 = Convert.ToBase64String(Model.Photo);
+                        <img src="data:image/png;base64,@base64" class="rounded-circle" style="width:100px; height:100px;" />
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PhotoFile" class="form-label">Yeni Fotoğraf (opsiyonel)</label>
+                    <input asp-for="PhotoFile" type="file" class="form-control" accept="image/*" />
+                    <span asp-validation-for="PhotoFile" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-success me-2">
+                        <i class="bi bi-pencil-square"></i> Güncelle
+                    </button>
+                    <a asp-action="Users" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> İptal
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="LastName" class="form-label">Soyad</label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label">E-Posta</label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="PasswordHash" class="form-label">Parola (güncellemek için tekrar girin)</label>
-        <input asp-for="PasswordHash" type="password" class="form-control" />
-        <span asp-validation-for="PasswordHash" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Role" class="form-label">Rol</label>
-        <select asp-for="Role" class="form-select" asp-items="ViewBag.Roles">
-            <option value="">-- Rol Seçiniz --</option>
-        </select>
-        <span asp-validation-for="Role" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Mevcut Fotoğraf</label><br />
-        @if (Model.Photo?.Length > 0)
-        {
-            var base64 = Convert.ToBase64String(Model.Photo);
-            <img src="data:image/png;base64,@base64" width="100" class="mb-2" />
-        }
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="PhotoFile" class="form-label">Yeni Fotoğraf (opsiyonel)</label>
-        <input asp-for="PhotoFile" type="file" class="form-control" />
-        <span asp-validation-for="PhotoFile" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-success">Güncelle</button>
-    <a asp-action="Users" class="btn btn-secondary">İptal</a>
-</form>
+</div>
 
 @section Scripts {
     @{

@@ -1,53 +1,69 @@
 ﻿@{
     ViewData["Title"] = "Dashboard";
+    Layout = "_Layout";
 }
 
-<h2>Hoşgeldiniz, @User.Identity.Name!</h2>
+<div class="container py-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body text-center">
+            <h4 class="card-title mb-1">Hoşgeldiniz, @User.Identity.Name!</h4>
+            <p class="card-text text-muted">Öğrenci Bilgi Sistemi’ne giriş yaptınız.</p>
+        </div>
+    </div>
 
-<div class="row mt-4">
-    @if (User.IsInRole("Admin"))
-    {
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Kullanıcı Yönetimi</h5>
-                    <p class="card-text">Admin olarak kullanıcı ekleyip düzenleyebilirsiniz.</p>
-                    <a asp-controller="Admin" asp-action="Users" class="btn btn-primary">Git</a>
+    <div class="row g-4">
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Kullanıcı Yönetimi</h5>
+                        <p class="card-text flex-grow-1">Admin olarak kullanıcı ekleyebilir, düzenleyebilir ve silebilirsiniz.</p>
+                        <a asp-controller="Admin" asp-action="CreateUser" class="btn btn-primary mt-2">
+                            <i class="bi bi-person-plus-fill"></i> Kullanıcı Ekle
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Ders Yönetimi</h5>
-                    <p class="card-text">Yeni ders oluşturup öğretmen atayabilirsiniz.</p>
-                    <a asp-controller="Admin" asp-action="Courses" class="btn btn-primary">Git</a>
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Ders Yönetimi</h5>
+                        <p class="card-text flex-grow-1">Yeni ders oluşturup öğretmen atayabilirsiniz.</p>
+                        <a asp-controller="Admin" asp-action="Courses" class="btn btn-primary mt-2">
+                            <i class="bi bi-book-fill"></i> Dersleri Yönet
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
-    else if (User.IsInRole("Teacher"))
-    {
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Derslerim</h5>
-                    <p class="card-text">Kendi derslerinizi yönetin ve kayıtları görün.</p>
-                    <a asp-controller="Teacher" asp-action="Index" class="btn btn-primary">Git</a>
+        }
+        else if (User.IsInRole("Teacher"))
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Derslerim</h5>
+                        <p class="card-text flex-grow-1">Kendi derslerinizi oluşturabilir, silebilir ve öğrenci kayıtlarını görebilirsiniz.</p>
+                        <a asp-controller="Teacher" asp-action="Index" class="btn btn-primary mt-2">
+                            <i class="bi bi-journal-bookmark-fill"></i> Derslerime Git
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
-    else if (User.IsInRole("Student"))
-    {
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Derslere Kayıt</h5>
-                    <p class="card-text">Açık dersleri görün ve kayıt olun.</p>
-                    <a asp-controller="Student" asp-action="Index" class="btn btn-primary">Git</a>
+        }
+        else if (User.IsInRole("Student"))
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Derslere Kayıt</h5>
+                        <p class="card-text flex-grow-1">Açık dersleri görüntüleyip istediğiniz derse kayıt olabilirsiniz.</p>
+                        <a asp-controller="Student" asp-action="Index" class="btn btn-primary mt-2">
+                            <i class="bi bi-pencil-square"></i> Kayıt Sayfam
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
+        }
+    </div>
 </div>

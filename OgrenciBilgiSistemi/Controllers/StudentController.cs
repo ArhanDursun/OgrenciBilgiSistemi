@@ -20,48 +20,93 @@ namespace OgrenciBilgiSistemi.Controllers
             int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         // GET: /Student
-        // Tüm dersleri listeler, kayıtlıysa butonu kapatır
         public async Task<IActionResult> Index()
         {
-            // Öğrencinin kayıt olduğu courseIds
-            var enrolledCourseIds = await _db.Enrollments
-                .Where(e => e.StudentId == CurrentStudentId)
+            var studentId = CurrentStudentId;
+
+            // Öğrencinin kayıt olduğu ders Id’leri
+            var enrolledIds = await _db.Enrollments
+                .Where(e => e.StudentId == studentId)
                 .Select(e => e.CourseId)
                 .ToListAsync();
 
-            // Tüm dersler ve ilgili öğretmen bilgisi
+            // Tüm dersler + öğretmen bilgisi
             var courses = await _db.Courses
                 .Include(c => c.Teacher)
                 .ToListAsync();
 
-            // View’a modeli: ders + kayıt durumu
-            var vm = courses.Select(c => new StudentCourseViewModel
+            // Available (kayıt olunabilecek) dersler
+            var available = courses
+                .Where(c => !enrolledIds.Contains(c.Id))
+                .Select(c => new StudentCourseViewModel
+                {
+                    CourseId = c.Id,
+                    Title = c.Title,
+                    TeacherName = $"{c.Teacher.FirstName} {c.Teacher.LastName}",
+                    IsEnrolled = false
+                })
+                .ToList();
+
+            // Enrolled (kayıtlı) dersler
+            var enrolled = courses
+                .Where(c => enrolledIds.Contains(c.Id))
+                .Select(c => new StudentCourseViewModel
+                {
+                    CourseId = c.Id,
+                    Title = c.Title,
+                    TeacherName = $"{c.Teacher.FirstName} {c.Teacher.LastName}",
+                    IsEnrolled = true
+                })
+                .ToList();
+
+            // Dashboard ViewModel
+            var vm = new StudentDashboardViewModel
             {
-                CourseId = c.Id,
-                Title = c.Title,
-                TeacherName = c.Teacher.FirstName + " " + c.Teacher.LastName,
-                IsEnrolled = enrolledCourseIds.Contains(c.Id)
-            }).ToList();
+                AvailableCourses = available,
+                EnrolledCourses = enrolled
+            };
 
             return View(vm);
         }
 
-        // POST: /Student/Enroll/5
+        // POST: /Student/Enroll
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Enroll(int courseId)
         {
-            // Zaten kayıtlı mı kontrol et
+            var studentId = CurrentStudentId;
+
+            // Zaten kayıtlı mı?
             var exists = await _db.Enrollments
-                .AnyAsync(e => e.CourseId == courseId && e.StudentId == CurrentStudentId);
+                .AnyAsync(e => e.CourseId == courseId && e.StudentId == studentId);
+
             if (!exists)
             {
                 _db.Enrollments.Add(new Enrollment
                 {
                     CourseId = courseId,
-                    StudentId = CurrentStudentId
+                    StudentId = studentId
                 });
                 await _db.SaveChangesAsync();
             }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: /Student/Unenroll
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unenroll(int courseId)
+        {
+            var studentId = CurrentStudentId;
+
+            var enrollment = await _db.Enrollments
+                .FirstOrDefaultAsync(e => e.CourseId == courseId && e.StudentId == studentId);
+
+            if (enrollment != null)
+            {
+                _db.Enrollments.Remove(enrollment);
+                await _db.SaveChangesAsync();
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }

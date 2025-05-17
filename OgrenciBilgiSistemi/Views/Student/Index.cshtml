@@ -1,40 +1,109 @@
-﻿@model IEnumerable<OgrenciBilgiSistemi.Models.StudentCourseViewModel>
+﻿@model OgrenciBilgiSistemi.Models.StudentDashboardViewModel
+
 @{
     ViewData["Title"] = "Derslere Kayıt Ol";
 }
 
 <h2>@ViewData["Title"]</h2>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Ders</th>
-            <th>Öğretmen</th>
-            <th>Durum</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in Model)
+<ul class="nav nav-tabs mb-4" id="studentTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="available-tab" data-bs-toggle="tab" data-bs-target="#available" type="button" role="tab">
+            Kayıt Olunabilecek Dersler
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="enrolled-tab" data-bs-toggle="tab" data-bs-target="#enrolled" type="button" role="tab">
+            Kayıtlı Olduğum Dersler
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="studentTabsContent">
+    <div class="tab-pane fade show active" id="available" role="tabpanel">
+        @if (!Model.AvailableCourses.Any())
         {
-            <tr>
-                <td>@c.Title</td>
-                <td>@c.TeacherName</td>
-                <td>
-                    @if (c.IsEnrolled)
-                    {
-                        <span class="badge bg-success">Kayıtlı</span>
-                    }
-                    else
-                    {
-                        <form asp-action="Enroll" method="post" class="d-inline">
-                            <input type="hidden" name="courseId" value="@c.CourseId" />
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                Kayıt Ol
-                            </button>
-                        </form>
-                    }
-                </td>
-            </tr>
+            <p>Yeni kayıt açılabilecek ders yok.</p>
         }
-    </tbody>
-</table>
+        else
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Ders</th>
+                        <th>Öğretmen</th>
+                        <th class="text-end">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.AvailableCourses)
+                    {
+                        <tr>
+                            <td>@c.Title</td>
+                            <td>@c.TeacherName</td>
+                            <td class="text-end">
+                                <form asp-action="Enroll" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="courseId" value="@c.CourseId" />
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        Kayıt Ol
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <div class="tab-pane fade" id="enrolled" role="tabpanel">
+        @if (!Model.EnrolledCourses.Any())
+        {
+            <p>Henüz kaydolduğunuz ders yok.</p>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Ders</th>
+                        <th>Öğretmen</th>
+                        <th class="text-end">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.EnrolledCourses)
+                    {
+                        <tr>
+                            <td>@c.Title</td>
+                            <td>@c.TeacherName</td>
+                            <td class="text-end">
+                                <form asp-action="Unenroll" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="courseId" value="@c.CourseId" />
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        Kaydı Bırak
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var triggerTabList = [].slice.call(document.querySelectorAll('#studentTabs button'))
+        triggerTabList.forEach(function (triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl)
+            triggerEl.addEventListener('click', function (e) {
+                e.preventDefault()
+                tabTrigger.show()
+            })
+        })
+    </script>
+}

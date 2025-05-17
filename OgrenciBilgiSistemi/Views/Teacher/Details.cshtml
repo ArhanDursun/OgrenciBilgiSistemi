@@ -1,31 +1,53 @@
 ﻿@model OgrenciBilgiSistemi.Models.Course
+
 @{
     ViewData["Title"] = "Derse Kayıtlı Öğrenciler";
+    Layout = "_Layout";
 }
 
-<h2>@Model.Title</h2>
-@if (!Model.Enrollments.Any())
-{
-    <p>Henüz kayıt yapan öğrenci yok.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr><th>Öğrenci Adı</th><th>E-Posta</th><th>Kayıt Tarihi</th></tr>
-        </thead>
-        <tbody>
-            @foreach (var e in Model.Enrollments)
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">@Model.Title</h5>
+            <a asp-controller="Teacher" asp-action="Index" class="btn btn-light">
+                <i class="bi bi-arrow-left-circle"></i> Geri
+            </a>
+        </div>
+        <div class="card-body">
+            @if (!Model.Enrollments.Any())
             {
-                <tr>
-                    <td>@e.Student.FirstName @e.Student.LastName</td>
-                    <td>@e.Student.Email</td>
-                    <td>@e.EnrolledAt.ToLocalTime().ToString("g")</td>
-                </tr>
+                <div class="alert alert-info mb-0">
+                    Henüz bu derse kayıtlı öğrenci yok.
+                </div>
             }
-        </tbody>
-    </table>
+            else
+            {
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Öğrenci Adı</th>
+                            <th scope="col">E-Posta</th>
+                            <th scope="col">Kayıt Tarihi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var e in Model.Enrollments)
+                        {
+                            <tr>
+                                <td>@e.Student.FirstName @e.Student.LastName</td>
+                                <td>@e.Student.Email</td>
+                                <td>@e.EnrolledAt.ToLocalTime().ToString("g")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
-<p>
-    <a asp-action="Index" class="btn btn-secondary">Geri</a>
-</p>

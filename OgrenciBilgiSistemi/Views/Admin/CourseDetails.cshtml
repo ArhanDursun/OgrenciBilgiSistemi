@@ -1,0 +1,36 @@
+﻿@model OgrenciBilgiSistemi.Models.Course
+
+@{
+    ViewData["Title"] = $"{Model.Title} - Kayıtlı Öğrenciler";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!Model.Enrollments.Any())
+{
+    <p>Bu derse henüz hiç öğrenci kayıtlı değil.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Ad Soyad</th>
+                <th>E-Posta</th>
+                <th>Kayıt Tarihi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model.Enrollments)
+            {
+                <tr>
+                    <td>@e.Student.FirstName @e.Student.LastName</td>
+                    <td>@e.Student.Email</td>
+                    <td>@e.EnrolledAt.ToLocalTime().ToString("g")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="Courses" class="btn btn-secondary">Geri</a>
