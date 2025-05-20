@@ -2,108 +2,177 @@
 
 @{
     ViewData["Title"] = "Derslere Kayıt Ol";
+    Layout = "_Layout";
 }
 
-<h2>@ViewData["Title"]</h2>
+<style>
+    /* Galatasaray arka plan & yazı renkleri */
+    .gs-bg {
+        background-color: #A32638;
+        color: #FECF0F;
+    }
 
-<ul class="nav nav-tabs mb-4" id="studentTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="available-tab" data-bs-toggle="tab" data-bs-target="#available" type="button" role="tab">
-            Kayıt Olunabilecek Dersler
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="enrolled-tab" data-bs-toggle="tab" data-bs-target="#enrolled" type="button" role="tab">
-            Kayıtlı Olduğum Dersler
-        </button>
-    </li>
-</ul>
+    .gs-bg-light {
+        background-color: #FECF0F;
+        color: #A32638;
+    }
 
-<div class="tab-content" id="studentTabsContent">
-    <div class="tab-pane fade show active" id="available" role="tabpanel">
-        @if (!Model.AvailableCourses.Any())
-        {
-            <p>Yeni kayıt açılabilecek ders yok.</p>
-        }
-        else
-        {
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Ders</th>
-                        <th>Öğretmen</th>
-                        <th class="text-end">İşlem</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var c in Model.AvailableCourses)
-                    {
-                        <tr>
-                            <td>@c.Title</td>
-                            <td>@c.TeacherName</td>
-                            <td class="text-end">
-                                <form asp-action="Enroll" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="courseId" value="@c.CourseId" />
-                                    <button type="submit" class="btn btn-sm btn-primary">
-                                        Kayıt Ol
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-    </div>
+    /* Tab lar */
+    .nav-pills .nav-link {
+        border-radius: 0;
+        color: #FECF0F;
+        background-color: transparent;
+    }
 
-    <div class="tab-pane fade" id="enrolled" role="tabpanel">
-        @if (!Model.EnrolledCourses.Any())
-        {
-            <p>Henüz kaydolduğunuz ders yok.</p>
+        .nav-pills .nav-link.active {
+            background-color: #FECF0F;
+            color: #A32638;
         }
-        else
-        {
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Ders</th>
-                        <th>Öğretmen</th>
-                        <th class="text-end">İşlem</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var c in Model.EnrolledCourses)
-                    {
-                        <tr>
-                            <td>@c.Title</td>
-                            <td>@c.TeacherName</td>
-                            <td class="text-end">
-                                <form asp-action="Unenroll" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="courseId" value="@c.CourseId" />
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        Kaydı Bırak
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+
+    /* Kart düzeni */
+    .gs-card {
+        background-color: #F8F0D6; /* hafif sarı ton */
+        border: 2px solid #A32638;
+        border-radius: 6px;
+        transition: transform .2s;
+    }
+
+        .gs-card:hover {
+            transform: scale(1.02);
         }
+
+        .gs-card .card-title {
+            color: #A32638;
+            font-weight: 600;
+        }
+
+        .gs-card .card-text {
+            color: #333;
+        }
+
+    /* Butonlar */
+    .btn-gs-primary {
+        background-color: #A32638;
+        color: #FECF0F;
+        border: none;
+    }
+
+        .btn-gs-primary:hover {
+            background-color: #7D1F2D;
+        }
+
+    .btn-gs-danger {
+        background-color: #FECF0F;
+        color: #A32638;
+        border: 1px solid #A32638;
+    }
+
+        .btn-gs-danger:hover {
+            background-color: #F8D93A;
+        }
+</style>
+
+<div class="min-vh-100 py-5 gs-bg">
+    <div class="container">
+        <h2 class="mb-4">@ViewData["Title"]</h2>
+
+        <ul class="nav nav-pills mb-4" id="studentTabs" role="tablist">
+            <li class="nav-item me-2" role="presentation">
+                <button class="nav-link active"
+                        id="available-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#available"
+                        type="button" role="tab">
+                    Kayıt Olunabilecek Dersler
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link"
+                        id="enrolled-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#enrolled"
+                        type="button" role="tab">
+                    Kayıtlı Olduğum Dersler
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- AVAILABLE COURSES -->
+            <div class="tab-pane fade show active" id="available" role="tabpanel">
+                @if (!Model.AvailableCourses.Any())
+                {
+                    <p class="text-light">Yeni kayıt açılabilecek ders yok.</p>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        @foreach (var c in Model.AvailableCourses)
+                        {
+                            <div class="col-md-4 col-lg-3">
+                                <div class="card gs-card p-3 h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <h5 class="card-title">@c.Title</h5>
+                                        <p class="card-text">Öğretmen: @c.TeacherName</p>
+                                    </div>
+                                    <form asp-action="Enroll" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="courseId" value="@c.CourseId" />
+                                        <button type="submit" class="btn btn-gs-primary w-100 mt-2">
+                                            Kayıt Ol
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- ENROLLED COURSES -->
+            <div class="tab-pane fade" id="enrolled" role="tabpanel">
+                @if (!Model.EnrolledCourses.Any())
+                {
+                    <p class="text-light">Henüz kaydolduğunuz ders yok.</p>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        @foreach (var c in Model.EnrolledCourses)
+                        {
+                            <div class="col-md-4 col-lg-3">
+                                <div class="card gs-card p-3 h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <h5 class="card-title">@c.Title</h5>
+                                        <p class="card-text">Öğretmen: @c.TeacherName</p>
+                                    </div>
+                                    <form asp-action="Unenroll" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="courseId" value="@c.CourseId" />
+                                        <button type="submit" class="btn btn-gs-danger w-100 mt-2">
+                                            Kaydı Bırak
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        var triggerTabList = [].slice.call(document.querySelectorAll('#studentTabs button'))
+        // Bootstrap tab init
+        var triggerTabList = [].slice.call(document.querySelectorAll('#studentTabs button'));
         triggerTabList.forEach(function (triggerEl) {
-            var tabTrigger = new bootstrap.Tab(triggerEl)
+            var tab = new bootstrap.Tab(triggerEl);
             triggerEl.addEventListener('click', function (e) {
-                e.preventDefault()
-                tabTrigger.show()
-            })
-        })
+                e.preventDefault();
+                tab.show();
+            });
+        });
     </script>
 }

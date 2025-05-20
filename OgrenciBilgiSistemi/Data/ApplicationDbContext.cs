@@ -16,21 +16,21 @@ namespace OgrenciBilgiSistemi.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Öğrenci silindiğinde Enrollment kayıtları SILINMEYECEK (Restrict)
+            // 1) Öğrenci silindiğinde Enrollment'lar DB tarafından otomatik silinmesin:
             modelBuilder.Entity<Enrollment>()
                 .HasOne(e => e.Student)
                 .WithMany(u => u.Enrollments)
                 .HasForeignKey(e => e.StudentId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);  // veya .NoAction() / .ClientCascade()
 
-            // Ders silindiğinde o derse ait Enrollment kayıtları silinsin
+            // 2) Ders silindiğinde Enrollment'lar kaskad silinsin
             modelBuilder.Entity<Enrollment>()
                 .HasOne(e => e.Course)
                 .WithMany(c => c.Enrollments)
                 .HasForeignKey(e => e.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Öğretmen silindiğinde ders ve o dersin tüm Enrollment’ları silinsin
+            // 3) Öğretmen silindiğinde Course (+ onun Enrollment'ları) kaskad silinsin
             modelBuilder.Entity<Course>()
                 .HasOne(c => c.Teacher)
                 .WithMany(u => u.CoursesTeaching)

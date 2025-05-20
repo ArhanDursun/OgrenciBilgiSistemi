@@ -22,10 +22,25 @@ namespace OgrenciBilgiSistemi.Controllers
         // -------------------------
 
         // GET: /Admin/Users
-        public async Task<IActionResult> Users()
+        public async Task<IActionResult> Users(string searchString)
         {
-            var users = await _db.Users.ToListAsync();
-            return View(users);
+            // Arama terimini ViewData’ya alalım
+            ViewData["CurrentFilter"] = searchString;
+
+            // Sorguyu başlat
+            IQueryable<User> users = _db.Users;
+
+            // Eğer arama terimi varsa FirstName veya LastName’e göre filtrele
+            if (!string.IsNullOrWhiteSpace(searchString))
+            {
+                users = users.Where(u =>
+                    u.FirstName.Contains(searchString) ||
+                    u.LastName.Contains(searchString));
+            }
+
+            // Verileri listele ve View’e gönder
+            var model = await users.ToListAsync();
+            return View(model);
         }
 
         // GET: /Admin/CreateUser
@@ -116,8 +131,12 @@ namespace OgrenciBilgiSistemi.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _db.Users.FindAsync(id);
+            var user = await _db.Users
+                       .FirstOrDefaultAsync(u => u.Id == id);
             if (user == null) return NotFound();
+            var enrollments = _db.Enrollments
+                .Where(e => e.StudentId == id);
+                _db.Enrollments.RemoveRange(enrollments);
             _db.Users.Remove(user);
             await _db.SaveChangesAsync();
             return RedirectToAction(nameof(Users));

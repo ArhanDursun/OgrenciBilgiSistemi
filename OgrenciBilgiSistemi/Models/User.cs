@@ -20,7 +20,8 @@ namespace OgrenciBilgiSistemi.Models
         [Required, EmailAddress, MaxLength(100)]
         public string Email { get; set; }
 
-        [Required]
+        [Required(ErrorMessage ="Boş Bırakılamaz Ve Minimum uzunluk 6 Maksimum uzunluk 20 karakter olmalı")]
+        [MinLength(6),MaxLength(20)]
         public string PasswordHash { get; set; }
 
         [Required, MaxLength(20)]
